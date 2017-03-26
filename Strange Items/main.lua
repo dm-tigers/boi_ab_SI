@@ -6,6 +6,7 @@ local player;
 local room;
 local level;
 local resAllowed = false;
+
 local modItems = {
 	AMULET = Isaac.GetItemIdByName("Strange Amulet"),
 	CLOAK = Isaac.GetItemIdByName("Strange Cloak")
@@ -15,7 +16,7 @@ local hasItems = {
 	Amulet = false,
 	Cloak = false;
 }
-local numStrangeItems = 0;
+local numStrangeItems = 0; -- keep count for TODO transformation
 -----------------------------------
 
 function strange:onUpdate(player, room)
@@ -25,9 +26,10 @@ function strange:onUpdate(player, room)
 	level = game:GetLevel();
 	if player:IsDead() and player:HasCollectible(modItems.AMULET) and resAllowed == true and room.GetType() == RoomType.ROOM_BOSS then
 		player:Revive();
+		--TODO: Go back one room, pop up text and hold up item
 		game:ChangeRoom(level:GetPreviousRoomIndex())
 		if player:GetMaxHearts() == 0 then
-			player:AddSoulHearts(6);
+			player:AddSoulHearts(6); --in case no red hearts
 		else  
 			player:AddHearts(player:GetMaxHearts());
 		end
@@ -36,7 +38,7 @@ function strange:onUpdate(player, room)
 	end
 	end
 
-	function strange:onCache(player,myCacheFlag)
+	function strange:onCache(player,myCacheFlag)-- update stats and flying
 	if myCacheFlag == CacheFlag.CACHE_FLYING then
 		if player:HasCollectible(modItems.CLOAK) then
 			player.CanFly = true;
@@ -45,15 +47,15 @@ function strange:onUpdate(player, room)
 	end
 	if myCacheFlag == CacheFlag.CACHE_DAMAGE then
 		if player:HasCollectible(modItems.AMULET) then
-			player.Damage = player.Damage + 1.69;
-			--player.Luck = player.Luck + 2;
+			player.Damage = 1.01(player.Damage + 0.69);
+			--player.Luck = player.Luck + 2; didn't work right
 			hasItems.AMULET = true;
 			
 		end
 	end
 end
 
-function strange:onNewLevel()
+function strange:onNewLevel() --Check if final floors(hopefully)
 	game = Game();
 	level = Game():GetLevel();
 	if level >= LevelStage.STAGE6 then
